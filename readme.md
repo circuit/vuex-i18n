@@ -1,21 +1,24 @@
 # vuex-i18n
-We are big fans of the awesome vue, vuex and vue-router libraries and were just
-looking for an easy to use internationalization plugin, employing as much of
-the "standard library" as possible.
 
-The main difference to other internationalization plugins is the ease of use
-and support for locales directly with the application or later from the server.
+This is a fork from [vuex-i18n](https://github.com/dkfbasel/vuex-i18n) with enhancements for [vue3](https://v3.vuejs.org/). The plugin can be used as *Plugin* or as *Composition API*.
+
+Simple example applications for both, as [plugin](/examples/use-as-plugin) and as [composition API](/examples/use-as-composition-api) can be found in the examples folder. Both examples use [vite](https://github.com/vitejs/vite) as build tool. Run apps via `npm run dev`.
+
+The APIs remain largley unchanged with the main different being the removal of translation filters. Filters are not supported in vue 3.
 
 ## Requirements
-- Vue ^2.0.0
-- Vuex ^2.0.0
+
+- Vue ^3.0.0
+- Vuex ^4.0.0-rc.1 (or newer)
 
 ## Installation
-```
-$ npm install vuex-i18n
+
+```bash
+$ npm install @unify/vuex-i18n
 ```
 
 ## Setup
+
 The vuex-i18n plugin is intended to be used for applications that use vuex as
 store and require localized messages. Make sure that both vue and vuex have
 been loaded beforehand.
@@ -30,70 +33,36 @@ after when the user is switching to a different language.
 A corresponding example can be found in the test directory.
 
 ```javascript
+// main.js
+import { createApp } from 'vue'
+import { createStore } from 'vuex'
+import { createI18nPlugin, useI18nPlugin } from 'vuex-i18n'
+import App from './App.vue'
 
-// load vue and vuex instance
-import Vue from 'vue';
-import Vuex from 'vuex';
+const app = createApp(App)
+const store = createStore({})
+app.use(store)
 
-// load vuex i18n module
-import vuexI18n from 'vuex-i18n';
+// Create i18n plugin with store as first paramter
+app.use(createI18nPlugin(store/*, config */))
 
-// IMPORTANT NOTE:
-// The default format for the plugin is in es2015, if you do not use a transpiler
-// such as babel) or for use in server side rendering (such as nuxt)
-// the umd version should be loaded like this
-// import vuexI18n from 'vuex-i18n/dist/vuex-i18n.umd.js';
+// Set translations and locale
+const i18n = useI18nPlugin()
+i18n.add('en', { title: 'My Title'})
+i18n.set('en')
 
-// initialize the vuex store using the vuex module. note that you can change the
-//  name of the module if you wish
-const store = new Vuex.Store();
+app.mount('#app')
 
-// initialize the internationalization plugin on the vue instance. note that
-// the store must be passed to the plugin. the plugin will then generate some
-// helper functions for components (i.e. this.$i18n.set, this.$t) and on the vue
-// instance (i.e. Vue.i18n.set).
-Vue.use(vuexI18n.plugin, store);
+```
 
-// please note that you must specify the name of the vuex module if it is
-// different from i18n. i.e. Vue.use(vuexI18n.plugin, store, {moduleName: 'myName'})
-
-
-// add some translations (could also be loaded from a separate file)
-// note that it is possible to use placeholders. translations can also be
-// structured as object trees and will automatically be flattened by the the
-// plugin
-const translationsEn = {
-	"content": "This is some {type} content"
-};
-
-// translations can be kept in separate files for each language
-// i.e. resources/i18n/de.json.
-const translationsDe = {
-	"My nice title": "Ein schöner Titel",
-	"content": "Dies ist ein toller Inhalt"
-};
-
-// add translations directly to the application
-Vue.i18n.add('en', translationsEn);
-Vue.i18n.add('de', translationsDe);
-
-// set the start locale to use
-Vue.i18n.set('en');
-
-// create a new component (requires a div with id app as mount point)
-// you can use the method $t to access translations. the value will be returned
-// as is, if no corresponding key is found in the translations
-var app = new Vue({
-	store,
-	el: '#app',
-	template: `
-		<div>
-			<h1>{{ 'My nice title' | translate }}</h1>
-			<p>{{ $t('content', {'type': 'nice'}) }}</p>
-		</div>
-	`
-});
-
+```html
+<!-- App.vue -->
+<template>
+  <div>{{ $t('title') }}</div>
+</template>
+<script>
+export default { name: 'App' }
+</script>
 ```
 
 You can specify a custom module name for vuex (default is 'i18n') or a callback that is triggered
@@ -111,18 +80,18 @@ subsequent calls of the same key will not trigger the onTranslationNotFound meth
 ```javascript
 
 // without return value (will use fallback translation, default translation or key)
-Vue.use(vuexI18n.plugin, store, {
+app.use(createI18nPlugin(store, {
 	moduleName: 'i18n',
 	onTranslationNotFound (locale, key) {
 		console.warn(`i18n :: Key '${key}' not found for locale '${locale}'`);
 	}}
-);
+));
 
 // with string as return value. this will write the new value as translation
 // into the store
 // note: synchronous resolving of keys is not recommended as this functionality
 // should be implemented in a different way
-Vue.use(vuexI18n.plugin, store, {
+app.use(createI18nPlugin(store, {
 	moduleName: 'i18n',
 	onTranslationNotFound (locale, key) {
 		switch(key) {
@@ -133,11 +102,11 @@ Vue.use(vuexI18n.plugin, store, {
 			return 'There was a problem';
 		}
 	}}
-);
+));
 
 // with promise as return value. this will write the new value into the store,
 // after the promise is resolved
-Vue.use(vuexI18n.plugin, store, {
+Vue.use(createI18nPlugin(store, {
 	moduleName: 'i18n',
 	onTranslationNotFound (locale, key) {
 
@@ -153,7 +122,7 @@ Vue.use(vuexI18n.plugin, store, {
 		})
 
 	}}
-);
+));
 
 ```
 ## Config
@@ -165,25 +134,22 @@ At present, the configuration options that are supported are as follows:
 - `moduleName` (default `i18n`)
 - `identifiers` (default `['{', '}']`)
 - `preserveState` (default `false`)
-- `translateFilterName` (default `translate`)
-- `translateInFilterName` (default `translateIn`)
 - `onTranslationNotFound` (default `function(){}`)
 - `warnings`: default(`true`)
 
 ```javascript
 
 const config = {
-	moduleName: 'myName',
-	translateFilterName: 't'
+	moduleName: 'myName'
 }
 
-Vue.use(vuexI18n.plugin, store, config)
+app.use(createI18nPlugin(store, config))
 
 ```
 
 ## Usage
 vuex-i18n provides easy access to localized information through the use of
-the `$t()` method or the `translate` filter.
+the `$t()`.
 
 The plugin will try to find the given string as key in the translations of the
 currently defined locale and return the respective translation. If the string
@@ -233,9 +199,9 @@ Therefore it might be necessary to escape certain characters accordingly.
 
 ```javascript
 // i.e. to use {{count}} as variable substitution.
-Vue.use(vuexI18n.plugin, store, {
+app.use(createI18nPlugin(store, {
 	identifiers: ['{{','}}']
-});
+}));
 ```
 
 Basic pluralization is also supported. Please note, that the singular translation
@@ -300,55 +266,52 @@ There are also several methods available on the property `this.$i18n` or `Vue.i1
 ```javascript
 
 // translate the given key
-$t(), Vue.i18n.translate()
+$t(), i18n.translate()
 
 // translate the given key in a specific locale, also available as filter
 // i.e {{ 'message' | translateIn('en') }}
-$tlang(), Vue.i18n.translateIn()
+i18n.translateIn()
 
 // get the current locale
-$i18n.locale(), Vue.i18n.locale()
+i18n.locale()
 
 // get all available locales
 // is is however recommended to use a computed property to fetch the locales
 // returning Object.keys(this.$store.state.i18n.translations); as this will
 // make use of vue's caching system.
-$i18n.locales(), Vue.i18n.locales()
+i18n.locales()
 
 // set the current locale (i.e. 'de', 'en')
-$i18n.set(locale), Vue.i18n.set(locale)
+i18n.set(locale)
 
 // add locale translation to the storage. this will extend existing information
 // (i.e. 'de', {'message': 'Eine Nachricht'})
-$i18n.add(locale, translations), Vue.i18n.add(locale, translations)
+i18n.add(locale, translations)
 
 // replace locale translations in the storage. this will remove all previous
 // locale information for the specified locale
-$i18n.replace(locale, translations), Vue.i18n.replace(locale, translations)
+i18n.replace(locale, translations)
 
 // remove the given locale from the store
-$i18n.remove(locale), Vue.i18n.remove(locale)
+i18n.remove(locale)
 
 // set a fallback locale if translation for current locale does not exist
-$i18n.fallback(locale), Vue.i18n.fallback(locale)
+i18n.fallback(locale)
 
 // check if the given locale translations are present in the store
-$i18n.localeExists(locale), Vue.i18n.localeExists(locale)
+i18n.localeExists(locale)
 
 // check if the given key is available (will check current, regional and fallback locale)
-$i18n.keyExists(key), Vue.i18n.keyExists(key)
+i18n.keyExists(key)
 
 // optional with a second parameter to limit the scope
 // strict: only current locale (exact match)
 // locale: current locale and parent language locale (i.e. en-us & en)
 // fallback: current locale, parent language locale and fallback locale
 // the default is fallback
-$i18n.keyExists(key, 'strict'), $i18n.keyExists(key, 'locale'), $i18n.keyExists(key, 'fallback'),
+i18n.keyExists(key, 'strict'), i18n.keyExists(key, 'locale'), i18n.keyExists(key, 'fallback'),
 
 ```
-
-## Third-Party Integration
-Thanks to Liip Team Amboss for developing an interactive translation manager for node.js. You can find it at https://github.com/liip-amboss/locale-man.
 
 
 ## Contributions

@@ -1,18 +1,18 @@
 {
-  "name": "vuex-i18n",
-  "version": "1.13.1",
-  "description": "Easy localization for vue-components using vuex as data store",
+  "name": "@unify/vuex-i18n",
+  "version": "0.0.1",
+  "description": "Localization for vue 3 applications that use vuex. Can be used as plugin or composition api.",
   "directories": {
-    "test": "test",
-    "doc": "docs",
     "lib": "src"
   },
   "main": "dist/vuex-i18n.es.js",
   "types": "dist/vuex-i18n.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dkfbasel/vuex-i18n.git"
+    "url": "git+https://github.com/circuit/vuex-i18n.git"
   },
   "keywords": [
     "localization",
@@ -22,11 +22,16 @@
     "i18n"
   ],
   "author": {
-    "name": "Ramon Saccilotto",
-    "email": "tikiatua@gmail.com",
-    "url": "https://github.com/tikiatua"
+    "name": "Roger Urscheler",
+    "email": "rurscheler@gmail.com",
+    "url": "https://github.com/rogeru"
   },
   "contributors": [
+    {
+      "name": "Ramon Saccilotto",
+      "email": "tikiatua@gmail.com",
+      "url": "https://github.com/tikiatua"
+    },
     {
       "name": "Vu Duong",
       "email": "info@spotlit.de",
@@ -40,7 +45,7 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/dkfbasel/vuex-i18n/issues"
+    "url": "https://github.com/circuit/vuex-i18n/issues"
   },
-  "homepage": "https://github.com/dkfbasel/vuex-i18n#readme"
+  "homepage": "https://github.com/circuit/vuex-i18n#readme"
 }

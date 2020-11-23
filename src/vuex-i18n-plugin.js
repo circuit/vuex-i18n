@@ -6,37 +6,20 @@
 import module from './vuex-i18n-store';
 import plurals from './vuex-i18n-plurals';
 
-// initialize the plugin object
-let VuexI18nPlugin = {};
-
 // internationalization plugin for vue js using vuex
-VuexI18nPlugin.install = function install(Vue, store, config) {
-
-	// TODO: remove this block for next major update (API break)
-	if (typeof arguments[2] === 'string' || typeof arguments[3] === 'string') {
-		console.warn('i18n: Registering the plugin vuex-i18n with a string for `moduleName` or `identifiers` is deprecated. Use a configuration object instead.', 'https://github.com/dkfbasel/vuex-i18n#setup');
-		config = {
-			moduleName: arguments[2],
-			identifiers: arguments[3]
-		};
-	}
-
+export function setup(store, config) {
 	// merge default options with user supplied options
 	config = Object.assign({
 		warnings: true,
 		moduleName: 'i18n',
 		identifiers: ['{', '}'],
 		preserveState: false,
-		translateFilterName: 'translate',
-		translateInFilterName: 'translateIn',
 		onTranslationNotFound: function() {}
 	}, config);
 
 	// define module name and identifiers as constants to prevent any changes
 	const moduleName = config.moduleName;
 	const identifiers = config.identifiers;
-	const translateFilterName = config.translateFilterName;
-	const translateInFilterName = config.translateInFilterName;
 
 	// initialize the onTranslationNotFound function and make sure it is actually
 	// a function
@@ -53,21 +36,7 @@ VuexI18nPlugin.install = function install(Vue, store, config) {
 	// check if the plugin was correctly initialized
 	if (store.state.hasOwnProperty(moduleName) === false) {
 		console.error('i18n: i18n vuex module is not correctly initialized. Please check the module name:', moduleName);
-
-		// always return the key if module is not initialized correctly
-		Vue.prototype.$i18n = function(key) {
-			return key;
-		};
-
-		Vue.prototype.$getLanguage = function() {
-			return null;
-		};
-
-		Vue.prototype.$setLanguage = function() {
-			console.error('i18n: i18n vuex module is not correctly initialized');
-		};
-
-		return;
+		return false;
 	};
 
 	// initialize the replacement function
@@ -151,12 +120,8 @@ VuexI18nPlugin.install = function install(Vue, store, config) {
 		// flag for translation to exist or not
 		let translationExists = true;
 
-		// check if the language exists in the store. return the key if not
-		if (translations.hasOwnProperty(locale) === false ) {
-			translationExists = false;
-
-		// check if the key exists in the store. return the key if not
-		} else if (translations[locale].hasOwnProperty(key) === false) {
+		// check if the language and key exists in the store. return the key if not
+		if (translations.hasOwnProperty(locale) === false || translations[locale].hasOwnProperty(key) === false) {
 			translationExists = false;
 		}
 
@@ -199,11 +164,6 @@ VuexI18nPlugin.install = function install(Vue, store, config) {
 
 		return render(locale, translations[fallback][key], options, pluralization);
 
-	};
-
-	// add a filter function to translate in a given locale (i.e. {{ 'something' | translateIn('en') }})
-	let translateInLanguageFilter = function translateInLanguageFilter(key, locale, ...args) {
-		return translateInLanguage(locale, key, ...args);
 	};
 
 	// check if the given key exists in the current locale
@@ -310,8 +270,7 @@ VuexI18nPlugin.install = function install(Vue, store, config) {
 		return store.state[moduleName].translations.hasOwnProperty(locale);
 	};
 
-	// register vue prototype methods
-	Vue.prototype.$i18n = {
+	return {
 		locale: getLocale,
 		locales: getLocales,
 		set: setLocale,
@@ -321,40 +280,10 @@ VuexI18nPlugin.install = function install(Vue, store, config) {
 		fallback: setFallbackLocale,
 		localeExists: checkLocaleExists,
 		keyExists: checkKeyExists,
-
 		translate: translate,
 		translateIn: translateInLanguage,
-
 		exists: phaseOutExistsFn
-	};
-
-	// register global methods
-	Vue.i18n = {
-		locale: getLocale,
-		locales: getLocales,
-		set: setLocale,
-		add: addLocale,
-		replace: replaceLocale,
-		remove: removeLocale,
-		fallback: setFallbackLocale,
-		translate: translate,
-		translateIn: translateInLanguage,
-		localeExists: checkLocaleExists,
-		keyExists: checkKeyExists,
-
-		exists: phaseOutExistsFn
-	};
-
-	// register the translation function on the vue instance directly
-	Vue.prototype.$t = translate;
-
-	// register the specific language translation function on the vue instance directly
-	Vue.prototype.$tlang = translateInLanguage;
-
-	// register a filter function for translations
-	Vue.filter(translateFilterName, translate);
-	Vue.filter(translateInFilterName, translateInLanguageFilter);
-
+	}
 };
 
 // renderFn will initialize a function to render the variable substitutions in
@@ -362,13 +291,14 @@ VuexI18nPlugin.install = function install(Vue, store, config) {
 // variable substitutions, i.e. {test} or {{test}}, note that we are using a
 // closure to avoid recompilation of the regular expression to match tags on
 // every render cycle.
-let renderFn = function(identifiers, warnings = true) {
+const renderFn = function(identifiers, warnings = true) {
 
-	if (identifiers == null || identifiers.length != 2) {
+	if (identifiers === null || identifiers.length !== 2) {
 		console.warn('i18n: You must specify the start and end character identifying variable substitutions');
+		return function() {};
 	}
 
-	// construct a regular expression ot find variable substitutions, i.e. {test}
+	// construct a regular expression to find variable substitutions, i.e. {test}
 	let matcher = new RegExp('' + identifiers[0] + '{1}(\\w{1}|\\w.+?)' + identifiers[1] + '{1}', 'g');
 
 	// define the replacement function
@@ -416,11 +346,11 @@ let renderFn = function(identifiers, warnings = true) {
 
 				// replace the placeholder elements in all sub-items
 				return translation.map((item) => {
-					return replace(item, replacements, false);
+					return replace(item, replacements);
 				});
 
 			} else if (objType === 'string') {
-				return replace(translation, replacements, true);
+				return replace(translation, replacements);
 			}
 
 		};
@@ -481,5 +411,3 @@ let renderFn = function(identifiers, warnings = true) {
 function isArray(obj) {
 	return !!obj && Array === obj.constructor;
 }
-
-export default VuexI18nPlugin;
