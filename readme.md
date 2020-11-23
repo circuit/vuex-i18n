@@ -89,14 +89,14 @@ import { provideI18n, useI18n } from 'vuex-i18n'
 export default {
   name: 'App',
   setup() {
-	// Add translations and set language
-	const i18n = provideI18n(/* config */)
-	i18n.add('en', { title: 'My Title'})
-	i18n.set('en')
-	
-	// Child components can access i18n via useI18n
-	const { translate: t, locale } = useI18n()
-	return { t, locale }
+    // Add translations and set language
+    const i18n = provideI18n(/* config */)
+    i18n.add('en', { title: 'My Title'})
+    i18n.set('en')
+
+    // Child components can access i18n via useI18n
+    const { translate: t, locale } = useI18n()
+    return { t, locale }
   }
 }
 </script>
@@ -120,10 +120,10 @@ subsequent calls of the same key will not trigger the onTranslationNotFound meth
 
 // without return value (will use fallback translation, default translation or key)
 app.use(createI18nPlugin(store, {
-	moduleName: 'i18n',
-	onTranslationNotFound (locale, key) {
-		console.warn(`i18n :: Key '${key}' not found for locale '${locale}'`);
-	}}
+  moduleName: 'i18n',
+  onTranslationNotFound (locale, key) {
+    console.warn(`i18n :: Key '${key}' not found for locale '${locale}'`);
+  }}
 ));
 
 // with string as return value. this will write the new value as translation
@@ -131,36 +131,32 @@ app.use(createI18nPlugin(store, {
 // note: synchronous resolving of keys is not recommended as this functionality
 // should be implemented in a different way
 app.use(createI18nPlugin(store, {
-	moduleName: 'i18n',
-	onTranslationNotFound (locale, key) {
-		switch(key) {
-		case: '200':
-			return 'Everything went fine';
-			break;
-		default:
-			return 'There was a problem';
-		}
-	}}
+  moduleName: 'i18n',
+  onTranslationNotFound (locale, key) {
+    switch(key) {
+    case: '200':
+      return 'Everything went fine';
+      break;
+    default:
+      return 'There was a problem';
+    }
+  }}
 ));
 
 // with promise as return value. this will write the new value into the store,
 // after the promise is resolved
 Vue.use(createI18nPlugin(store, {
-	moduleName: 'i18n',
-	onTranslationNotFound (locale, key) {
-
-		return new Promise((resolve, reject) => {
-			axios.get('/api/translations/async', {locale: locale, key:key})
-			.then((result) => {
-				resolve(result.data);
-
-			}).catch() {
-				reject();
-			}
-
-		})
-
-	}}
+  moduleName: 'i18n',
+  onTranslationNotFound (locale, key) {
+    return new Promise((resolve, reject) => {
+      axios.get('/api/translations/async', {locale: locale, key:key})
+      .then((result) => {
+        resolve(result.data);
+      }).catch() {
+        reject();
+      }
+    })
+  }}
 ));
 
 ```
@@ -179,7 +175,7 @@ At present, the configuration options that are supported are as follows:
 ```javascript
 
 const config = {
-	moduleName: 'myName'
+  moduleName: 'myName'
 }
 
 app.use(createI18nPlugin(store, config))
@@ -202,8 +198,8 @@ the key itself will be returned as translation.
 
 ```javascript
 <div>
-	// will return: "Some localized information"
-	{{ $t('Some localized information')}}
+  // will return: "Some localized information"
+  {{ $t('Some localized information')}}
 </div>
 
 ```
@@ -215,9 +211,9 @@ found in the current and in the fallback locale.
 
 ```javascript
 <div>
-	// will return: "Default information text" if the key non.existing.key is
-	// not specified in the current and the fallback locale
-	{{ $t('non.existing.key', 'Default information text')}}
+  // will return: "Default information text" if the key non.existing.key is
+  // not specified in the current and the fallback locale
+  {{ $t('non.existing.key', 'Default information text')}}
 </div>
 ```
 
@@ -226,8 +222,8 @@ key/value pairs.
 
 ```javascript
 <div>
-	// will return: "You have 5 new messages"
-	{{ $t('You have {count} new messages', {count: 5}) }}
+  // will return: "You have 5 new messages"
+  {{ $t('You have {count} new messages', {count: 5}) }}
 </div>
 ```
 
@@ -239,7 +235,7 @@ Therefore it might be necessary to escape certain characters accordingly.
 ```javascript
 // i.e. to use {{count}} as variable substitution.
 app.use(createI18nPlugin(store, {
-	identifiers: ['{{','}}']
+  identifiers: ['{{','}}']
 }));
 ```
 
@@ -252,40 +248,40 @@ the singular or pluralized translation should be used (see below for examples).
 
 ```javascript
 <div>
-	// will return: "You have 5 new messages" if the third argument is 5"
-	// or "You have 1 new message" if the third argument is 1
-	// or "You have 0 new messages" if the third argument is 0 (note pluralized version)
+  // will return: "You have 5 new messages" if the third argument is 5"
+  // or "You have 1 new message" if the third argument is 1
+  // or "You have 0 new messages" if the third argument is 0 (note pluralized version)
 
-	// using the translation directly (as specified in the current readme)
-	{{ $t('You have {count} new message ::: You have {count} new messages', {count: 5}, 5) }}
+  // using the translation directly (as specified in the current readme)
+  {{ $t('You have {count} new message ::: You have {count} new messages', {count: 5}, 5) }}
 
 
-	// using a key to lookup the translations
-	{{ $t('mykey', {count: 5}, 5) }}
+  // using a key to lookup the translations
+  {{ $t('mykey', {count: 5}, 5) }}
 
-	// in the store
-	const translations = {
-	  'mykey': 'You have {count} new message ::: You have {count} new messages'
-	}
+  // in the store
+  const translations = {
+    'mykey': 'You have {count} new message ::: You have {count} new messages'
+  }
 
-	// alternative specification with array for translations
-	const translations = {
-	  'mykey': [
-	    'You have {count} new message',
-	    'You have {count} new messages'
-	  ]
-	}
+  // alternative specification with array for translations
+  const translations = {
+    'mykey': [
+      'You have {count} new message',
+      'You have {count} new messages'
+    ]
+  }
 </div>
 ```
 
 ```javascript
 <div>
-	// In case when there are more than singular and plural versions like in Latvian language.
-	// will return: "5 bērni" (in english - 5 children) if the third argument is 5"
-	// or "2 bērni" if the third argument is 2
-	// or "1 bērns" if the third argument is 1
-	// or "0 bērnu" if the third argument is 0
-	{{ $t('{count} bērns ::: {count} bērni ::: {count} bērnu', {count: 5}, 5) }}
+  // In case when there are more than singular and plural versions like in Latvian language.
+  // will return: "5 bērni" (in english - 5 children) if the third argument is 5"
+  // or "2 bērni" if the third argument is 2
+  // or "1 bērns" if the third argument is 1
+  // or "0 bērnu" if the third argument is 0
+  {{ $t('{count} bērns ::: {count} bērni ::: {count} bērnu', {count: 5}, 5) }}
 </div>
 ```
 
@@ -295,8 +291,8 @@ possible to request a specific locale using the `$tlang()` method.
 
 ```javascript
 <div>
-	// will return the english translation regardless of the current locale
-	{{ $tlang('en', 'You have {count} new messages', {count: 5}) }}
+  // will return the english translation regardless of the current locale
+  {{ $tlang('en', 'You have {count} new messages', {count: 5}) }}
 </div>
 ```
 
