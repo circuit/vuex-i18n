@@ -30,7 +30,7 @@ The plugin does not make any assumption on how you want to load the localization
 information. It can be loaded on start in your application bundle or dynamically
 after when the user is switching to a different language.
 
-A corresponding example can be found in the test directory.
+### Use as Plugin
 
 ```javascript
 // main.js
@@ -52,7 +52,6 @@ i18n.add('en', { title: 'My Title'})
 i18n.set('en')
 
 app.mount('#app')
-
 ```
 
 ```html
@@ -64,6 +63,46 @@ app.mount('#app')
 export default { name: 'App' }
 </script>
 ```
+
+### Use as Composition API
+
+```javascript
+// main.js
+import { createApp } from 'vue'
+import { createStore } from 'vuex'
+import App from './App.vue'
+
+const app = createApp(App)
+app.use(createStore({}))
+app.mount('#app')
+```
+
+```html
+<!-- App.vue -->
+<template>
+  <div>locale is: {{ locale() }}</div>
+  <div>{{ t('title') }}</div>
+</template>
+<script>
+import { provideI18n, useI18n } from 'vuex-i18n'
+
+export default {
+  name: 'App',
+  setup() {
+	// Add translations and set language
+	const i18n = provideI18n(/* config */)
+	i18n.add('en', { title: 'My Title'})
+	i18n.set('en')
+	
+	// Child components can access i18n via useI18n
+	const { translate: t, locale } = useI18n()
+	return { t, locale }
+  }
+}
+</script>
+```
+
+### Detailed usage
 
 You can specify a custom module name for vuex (default is 'i18n') or a callback that is triggered
 when a key has no translation for the current locale. Please note, that the function
