@@ -36,7 +36,7 @@ after when the user is switching to a different language.
 // main.js
 import { createApp } from 'vue'
 import { createStore } from 'vuex'
-import { createI18nPlugin, useI18nPlugin } from 'vuex-i18n'
+import { createI18nPlugin, useI18nPlugin } from '@unify/vuex-i18n'
 import App from './App.vue'
 
 const app = createApp(App)
@@ -84,7 +84,7 @@ app.mount('#app')
   <div>{{ t('title') }}</div>
 </template>
 <script>
-import { provideI18n, useI18n } from 'vuex-i18n'
+import { provideI18n, useI18n } from '@unify/vuex-i18n'
 
 export default {
   name: 'App',
@@ -94,8 +94,9 @@ export default {
     i18n.add('en', { title: 'My Title'})
     i18n.set('en')
 
-    // Child components can access i18n via useI18n
-    const { translate: t, locale } = useI18n()
+    // Child components can access i18n via useI18n, but since this
+    // is the same component where provide is used, use the i18n var
+    const { translate: t, locale } = i18n  // useI18n()
     return { t, locale }
   }
 }

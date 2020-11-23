@@ -1,6 +1,6 @@
 {
   "name": "@unify/vuex-i18n",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Localization for vue 3 applications that use vuex. Can be used as plugin or composition api.",
   "directories": {
     "lib": "src"
