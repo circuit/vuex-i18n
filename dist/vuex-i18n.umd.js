@@ -798,6 +798,7 @@
 	  return i18n;
 	}
 
+	// Import this way to prevent warnings when lib is used with vue2
 	var i18nSymbol = Symbol();
 	function provideI18n(config) {
 	  var internalInstance = vue.getCurrentInstance();
