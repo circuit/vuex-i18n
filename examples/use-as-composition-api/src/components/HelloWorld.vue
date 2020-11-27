@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import { provideI18n, useI18n } from 'vuex-i18n'
+import { provideI18n, useI18n } from '@unify/vuex-i18n'
 
 export default {
   setup() {

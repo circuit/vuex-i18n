@@ -10,8 +10,6 @@
 </template>
 
 <script>
-import { provideI18n, useI18n } from 'vuex-i18n'
-
 export default {
   inject: ['i18n'],
   methods: {

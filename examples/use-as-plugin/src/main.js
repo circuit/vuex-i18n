@@ -1,6 +1,6 @@
 import { createApp, } from 'vue'
 import { store } from './store'
-import { createI18nPlugin, useI18nPlugin } from 'vuex-i18n'
+import { createI18nPlugin, useI18nPlugin } from '@unify/vuex-i18n'
 import App from './App.vue'
 import './index.css'
 

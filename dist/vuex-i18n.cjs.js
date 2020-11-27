@@ -755,6 +755,8 @@ function isArray$1(obj) {
   return !!obj && Array === obj.constructor;
 }
 
+function _typeof$2(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof$2 = function _typeof(obj) { return typeof obj; }; } else { _typeof$2 = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof$2(obj); }
+
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -773,14 +775,22 @@ function createI18nPlugin(store, config) {
   i18n = setup(store, config);
   return _objectSpread(_objectSpread({}, i18n), {}, {
     install: function install(app) {
-      // Exposes $i18n to components as well as $t directly
-      Object.assign(app.config.globalProperties, {
-        $i18n: i18n
-      }, {
-        $t: i18n.translate
-      }); // Allows components to `inject: ['i18n']`
+      if (typeof app === 'function') {
+        // Vue 2
+        app.$i18n = i18n;
+        app.prototype.$i18n = i18n;
+        app.prototype.$t = i18n.translate;
+      } else if (_typeof$2(app) === 'object' && app.config && app.config.globalProperties) {
+        // Vue 3
+        // Exposes $i18n to components as well as $t directly
+        Object.assign(app.config.globalProperties, {
+          $i18n: i18n
+        }, {
+          $t: i18n.translate
+        }); // Allows components to `inject: ['i18n']`
 
-      app.provide('i18n', i18n);
+        app.provide('i18n', i18n);
+      }
     }
   });
 }

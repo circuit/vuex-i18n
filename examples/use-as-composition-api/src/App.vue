@@ -5,7 +5,7 @@
 
 <script>
 import HelloWorld from './components/HelloWorld.vue'
-import { provideI18n, useI18n } from 'vuex-i18n'
+import { provideI18n, useI18n } from '@unify/vuex-i18n'
 
 export default {
   name: 'App',

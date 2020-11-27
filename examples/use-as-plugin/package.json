@@ -6,9 +6,9 @@
     "build": "vite build"
   },
   "dependencies": {
+    "@unify/vuex-i18n": "file:../..",
     "vue": "^3.0.2",
-    "vuex": "^4.0.0-rc.1",
-    "vuex-i18n": "file:../.."
+    "vuex": "^4.0.0-rc.1"
   },
   "devDependencies": {
     "vite": "^1.0.0-rc.8",
